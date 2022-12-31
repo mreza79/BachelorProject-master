@@ -16,7 +16,7 @@ const fileSchema = new mongoose.Schema(
         },
       },
     ],
-    menu: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",

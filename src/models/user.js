@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    colleagues: [
+    /* colleagues: [
       {
         colleague: {
           type: String,
@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema(
           },
         },
       },
-    ],
+    ], */
     tokens: [
       {
         token: {

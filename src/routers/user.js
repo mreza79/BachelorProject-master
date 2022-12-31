@@ -98,15 +98,25 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 10000000 * 2 },
+  fileFilter: function(req, file, cb) {
+    if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
+      return cb(new Error("Please upload a pdf document"));
+    }
+    cb(undefined, true);
+  }
 }).single("file" + Date.now());
 
-router.post("/users/me/uploadfiles", auth, async (req, res) => {
+router.post("/users/me/files", auth, async (req, res) => {
   upload(req, res, (err) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
     res.send(req.file);
   });
+});
+
+router.get("/users/me/files", auth, async (req, res) => {
+  res.send(req.user.file)
 });
 
 module.exports = router;
