@@ -33,9 +33,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    coleagues: [
+    colleagues: [
       {
-        coleague: {
+        colleague: {
           type: String,
           trim: true,
           unique: true,
