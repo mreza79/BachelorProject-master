@@ -116,7 +116,7 @@ router.post("/users/me/files", auth, async (req, res) => {
 });
 
 router.get("/users/me/files", auth, async (req, res) => {
-  res.send(req.user.file)
+  res.status(201).send(req.user.file)
 });
 
 module.exports = router;
