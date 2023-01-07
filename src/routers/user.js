@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const User = require("../models/user");
+const File = require("../models/file");
 const auth = require("../middleware/auth");
 const router = new express.Router();
 
@@ -57,7 +58,7 @@ router.get("/users/me", auth, async (req, res) => {
 
 router.patch("/users/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name", "email", "password", "colleagues", "files"];
+  const allowedUpdates = ["name", "email", "password", "files"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
@@ -98,12 +99,12 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 10000000 * 2 },
-  fileFilter: function(req, file, cb) {
+  fileFilter: function (req, file, cb) {
     if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
       return cb(new Error("Please upload a pdf document"));
     }
     cb(undefined, true);
-  }
+  },
 }).single("file" + Date.now());
 
 router.post("/users/me/files", auth, async (req, res) => {
@@ -116,7 +117,29 @@ router.post("/users/me/files", auth, async (req, res) => {
 });
 
 router.get("/users/me/files", auth, async (req, res) => {
-  res.status(201).send(req.user.file)
+  res.status(201).send(req.user.file);
+});
+
+router.get("/users/searchfiles", auth, async (req, res) => {
+  var name = req.query.name;
+  // var tag = req.query.tag;
+  const file = await File.find({ name }, (err, file) => {
+    if (err) {
+      res.status(400).send("Something went wrong!");
+    }
+    res.send(file);
+  });
+});
+
+router.get("/users/searchfilesbytags", auth, async (req, res) => {
+  // var name = req.query.name;
+  var tag = req.query.tag;
+  const file = await File.find({ tag }, (err, file) => {
+    if (err) {
+      res.status(400).send("Something went wrong!");
+    }
+    res.send(file);
+  });
 });
 
 module.exports = router;
