@@ -120,10 +120,10 @@ router.get("/users/me/files", auth, async (req, res) => {
   res.status(201).send(req.user.file);
 });
 
-router.get("/users/searchfiles", auth, async (req, res) => {
+router.get("/users/search", auth, async (req, res) => {
   var name = req.query.name;
-  // var tag = req.query.tag;
-  const file = await File.find({ name }, (err, file) => {
+  var tag = req.query.tag;
+  await File.find({ name, tag }, (err, file) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
@@ -131,7 +131,7 @@ router.get("/users/searchfiles", auth, async (req, res) => {
   });
 });
 
-router.get("/users/searchfilesbytags", auth, async (req, res) => {
+/* router.get("/users/searchfilesbytags", auth, async (req, res) => {
   // var name = req.query.name;
   var tag = req.query.tag;
   const file = await File.find({ tag }, (err, file) => {
@@ -140,6 +140,6 @@ router.get("/users/searchfilesbytags", auth, async (req, res) => {
     }
     res.send(file);
   });
-});
+}); */
 
 module.exports = router;
