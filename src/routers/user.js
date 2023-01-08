@@ -5,7 +5,7 @@ const File = require("../models/file");
 const auth = require("../middleware/auth");
 const router = new express.Router();
 
-router.post("/users", async (req, res) => {
+router.post("/", async (req, res) => {
   const user = new User(req.body);
 
   try {
@@ -17,7 +17,7 @@ router.post("/users", async (req, res) => {
   }
 });
 
-router.post("/users/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const user = await User.findByCredentials(
       req.body.email,
@@ -30,7 +30,7 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
-router.post("/users/logout", auth, async (req, res) => {
+router.post("/logout", auth, async (req, res) => {
   try {
     req.user.tokens = req.user.tokens.filter(
       (token) => token.token !== req.token
@@ -42,7 +42,7 @@ router.post("/users/logout", auth, async (req, res) => {
   }
 });
 
-router.post("/users/logoutAll", auth, async (req, res) => {
+router.post("/logoutAll", auth, async (req, res) => {
   try {
     req.user.tokens = [];
     await req.user.save();
@@ -52,11 +52,11 @@ router.post("/users/logoutAll", auth, async (req, res) => {
   }
 });
 
-router.get("/users/me", auth, async (req, res) => {
+router.get("/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
-router.patch("/users/me", auth, async (req, res) => {
+router.patch("/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "files"];
   const isValidOperation = updates.every((update) =>
@@ -75,7 +75,7 @@ router.patch("/users/me", auth, async (req, res) => {
   }
 });
 
-router.delete("/users/me", auth, async (req, res) => {
+router.delete("/me", auth, async (req, res) => {
   try {
     await req.user.remove();
     res.send(req.user);
@@ -107,7 +107,7 @@ const upload = multer({
   },
 }).single("file" + Date.now());
 
-router.post("/users/me/files", auth, async (req, res) => {
+router.post("/me/files", auth, async (req, res) => {
   upload(req, res, (err) => {
     if (err) {
       res.status(400).send("Something went wrong!");
@@ -116,11 +116,11 @@ router.post("/users/me/files", auth, async (req, res) => {
   });
 });
 
-router.get("/users/me/files", auth, async (req, res) => {
+router.get("/me/files", auth, async (req, res) => {
   res.status(201).send(req.user.file);
 });
 
-router.get("/users/search", auth, async (req, res) => {
+router.get("/search", auth, async (req, res) => {
   var name = req.query.name;
   var tag = req.query.tag;
   await File.find({ name, tag }, (err, file) => {
@@ -131,7 +131,7 @@ router.get("/users/search", auth, async (req, res) => {
   });
 });
 
-/* router.get("/users/searchfilesbytags", auth, async (req, res) => {
+/* router.get("//searchfilesbytags", auth, async (req, res) => {
   // var name = req.query.name;
   var tag = req.query.tag;
   const file = await File.find({ tag }, (err, file) => {
