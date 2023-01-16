@@ -131,13 +131,13 @@ router.get("/search", auth, async (req, res) => {
   });
 });
 
-router.get("/deadline/:id", auth, async (req, res) => {
+router.get("/date/:id", auth, async (req, res) => {
   var id = req.param.id;
   await File.find({ id }, (err, file) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
-    res.send(file.deadline);
+    res.send(file);
   });
 });
 
