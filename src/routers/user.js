@@ -131,15 +131,14 @@ router.get("/search", auth, async (req, res) => {
   });
 });
 
-/* router.get("//searchfilesbytags", auth, async (req, res) => {
-  // var name = req.query.name;
-  var tag = req.query.tag;
-  const file = await File.find({ tag }, (err, file) => {
+router.get("/deadline/:id", auth, async (req, res) => {
+  var id = req.param.id;
+  await File.find({ id }, (err, file) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
-    res.send(file);
+    res.send(file.deadline);
   });
-}); */
+});
 
 module.exports = router;

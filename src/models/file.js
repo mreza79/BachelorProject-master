@@ -21,6 +21,9 @@ const fileSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    deadline: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
