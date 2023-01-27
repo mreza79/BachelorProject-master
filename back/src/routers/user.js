@@ -1,10 +1,34 @@
 const express = require("express");
 const multer = require("multer");
+const nodemailer = require("nodemailer");
 const User = require("../models/user");
 const File = require("../models/file");
 const auth = require("../middleware/auth");
-const passport = require("passport-google-oauth20");
+// const passport = require("passport-google-oauth20");
 const router = new express.Router();
+
+const fs = require("fs");
+const readline = require("readline");
+const stream = require("stream");
+
+const searchStream = (filename, text) => {
+  return new Promise((resolve) => {
+    const inStream = fs.createReadStream("file/" + filename + ".txt");
+    const outStream = new stream();
+    const rl = readline.createInterface(inStream, outStream);
+    const result = [];
+    const regEx = new RegExp(text, "i");
+    rl.on("line", function (line) {
+      if (line && line.search(regEx) >= 0) {
+        result.push(line);
+      }
+    });
+    rl.on("close", function () {
+      console.log("finished search", filename);
+      resolve(result);
+    });
+  });
+};
 
 router.post("/", async (req, res) => {
   const user = new User(req.body);
@@ -18,9 +42,9 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  res.send('<a href="user/auth/google"> Authenticate with google')
-})
+// router.get("/", async (req, res) => {
+//   res.send('<a href="/auth/google"> Authenticate with google')
+// })
 
 router.post("/login", async (req, res) => {
   try {
@@ -63,7 +87,7 @@ router.get("/me", auth, async (req, res) => {
 
 router.patch("/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name", "email", "password", "files"];
+  const allowedUpdates = ["email", "password" /* , "files" */];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
@@ -105,7 +129,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 10000000 * 2 },
   fileFilter: function (req, file, cb) {
-    if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
+    if (!file.originalname.match(/\.(txt)$/)) {
       return cb(new Error("Please upload a pdf document"));
     }
     cb(undefined, true);
@@ -122,13 +146,14 @@ router.post("/me/files", auth, async (req, res) => {
 });
 
 router.get("/me/files", auth, async (req, res) => {
-  res.status(201).send(req.user.file);
+  const files = File.find({ users: req.user });
+  res.status(201).send(files);
 });
 
 router.get("/search", auth, async (req, res) => {
   var name = req.query.name;
   var tag = req.query.tag;
-  await File.find({ name, tag }, (err, file) => {
+  await File.find({ name, tags: tag }, (err, file) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
@@ -146,14 +171,44 @@ router.get("/date/:id", auth, async (req, res) => {
   });
 });
 
-router.get("/google", async (req, res) => {
-  passport.authenticate("google", { scope: ["email"] });
-});
-router.get("/google/callback", async (req, res) => {
-  passport.authenticate('google', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-  })
-});
+function sendEmail() {
+  const files = File.find({ deadline: { $gt: Date.now() } });
+
+  var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "mrj9012@gmail.com",
+      pass: "12345678",
+    },
+  });
+
+  files.forEach((file) => {
+    var mailOptions = {
+      from: "mrj9012@gmail.com",
+      to: file.user.email,
+      subject: "Deadline",
+      text: "Deadline passed",
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+  });
+}
+
+setInterval(sendEmail, 60);
+
+// router.get("/auth/google", async (req, res) => {
+//   passport.authenticate("google", { scope: ["email"] });
+// });
+// router.get("/google/callback", async (req, res) => {
+//   passport.authenticate('google', {
+//     successRedirect: '/',
+//     failureRedirect: '/login',
+//   })
+// });
 
 module.exports = router;

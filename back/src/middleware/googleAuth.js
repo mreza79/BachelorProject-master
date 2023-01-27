@@ -8,7 +8,7 @@ module.exports = function(passport) {
         clientSecret,
         callbackURL: "http://localhost:3001/google/callback"
     }, (accessToken, refreshToken, profile, done) => {
-        console.log(profile.emails[0].value);
+        console.log("profile.emails[0].value");
 
         User.findOne({email: profile.emails[0].value}).then((data) => {
             if (data) {
