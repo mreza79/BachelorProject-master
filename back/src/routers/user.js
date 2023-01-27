@@ -3,6 +3,7 @@ const multer = require("multer");
 const User = require("../models/user");
 const File = require("../models/file");
 const auth = require("../middleware/auth");
+const passport = require("passport-google-oauth20");
 const router = new express.Router();
 
 router.post("/", async (req, res) => {
@@ -16,6 +17,10 @@ router.post("/", async (req, res) => {
     res.status(400).send(e);
   }
 });
+
+router.get("/", async (req, res) => {
+  res.send('<a href="user/auth/google"> Authenticate with google')
+})
 
 router.post("/login", async (req, res) => {
   try {
@@ -139,6 +144,16 @@ router.get("/date/:id", auth, async (req, res) => {
     }
     res.send(file);
   });
+});
+
+router.get("/google", async (req, res) => {
+  passport.authenticate("google", { scope: ["email"] });
+});
+router.get("/google/callback", async (req, res) => {
+  passport.authenticate('google', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+  })
 });
 
 module.exports = router;

@@ -18,16 +18,20 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    googleId: {
+      type:String,
+      unique: true
+    },
     password: {
       type: String,
       required: true,
       minlength: 7,
       trim: true,
-      validate(value) {
-        if (value.toLowerCase().includes("password")) {
-          throw new Error('Password cannot contain "password"');
-        }
-      },
+      // validate(value) {
+      //   if (value.toLowerCase().includes("password")) {
+      //     throw new Error('Password cannot contain "password"');
+      //   }
+      // },
     },
     name: {
       type: String,

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 
 const fileSchema = new mongoose.Schema(
   {
@@ -16,11 +15,15 @@ const fileSchema = new mongoose.Schema(
         },
       },
     ],
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
+    users: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "User",
+        },
+      },
+    ],
     deadline: {
       type: Date,
     },
