@@ -199,7 +199,7 @@ function sendEmail() {
   });
 }
 
-setInterval(sendEmail, 60);
+setInterval(sendEmail, 60000);
 
 // router.get("/auth/google", async (req, res) => {
 //   passport.authenticate("google", { scope: ["email"] });
