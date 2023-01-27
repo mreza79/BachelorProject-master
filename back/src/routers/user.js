@@ -173,7 +173,7 @@ router.get("/date/:id", auth, async (req, res) => {
 
 function sendEmail() {
   const files = File.find({ deadline: { $gt: Date.now() } });
-
+  console.log("Checking for deadlines");
   var transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
