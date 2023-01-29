@@ -7,14 +7,14 @@ const auth = require("../middleware/auth");
 // const passport = require("passport-google-oauth20");
 const router = new express.Router();
 
-const FIND = require("find-in-files");
+const Find = require("find-in-files");
 
 router.get("/searchfiles", auth, async (req, res) => {
   const user = req.user;
   const text = req.query.text;
   const files = await File.find({ user: user._id });
   const results = [];
-  FIND.find(text, ".", ".txt$")
+  Find.find(text, ".", ".txt$")
     .then(function (results) {
       for (const file in results) {
         results.push(file);
@@ -139,7 +139,7 @@ router.delete("/me", auth, async (req, res) => {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads");
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     cb(
@@ -161,6 +161,7 @@ const upload = multer({
 }).single("file" + Date.now());
 
 router.post("/me/files", auth, async (req, res) => {
+  
   upload(req, res, (err) => {
     if (err) {
       res.status(400).send("Something went wrong!");
