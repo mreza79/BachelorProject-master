@@ -7,7 +7,27 @@ const auth = require("../middleware/auth");
 // const passport = require("passport-google-oauth20");
 const router = new express.Router();
 
-const fs = require("fs");
+const FIND = require("find-in-files");
+
+router.get("/searchfiles", auth, async (req, res) => {
+  const user = req.user;
+  const text = req.query.text;
+  const files = await File.find({ user: user._id });
+  const results = [];
+  FIND
+    .find(text, ".", ".txt$")
+    .then(function (results) {
+      for (const file in results) {
+        results.push(file);
+      }
+    })
+    .catch(function (err) {
+      console.error(err);
+    });
+  res.send(results);
+});
+
+/* const fs = require("fs");
 const readline = require("readline");
 const stream = require("stream");
 
@@ -28,7 +48,7 @@ const searchStream = (filename, text) => {
       resolve(result);
     });
   });
-};
+}; */
 
 router.post("/", async (req, res) => {
   const user = new User(req.body);
@@ -153,7 +173,8 @@ router.get("/me/files", auth, async (req, res) => {
 router.get("/search", auth, async (req, res) => {
   var name = req.query.name;
   var tag = req.query.tag;
-  await File.find({ name, tags: tag }, (err, file) => {
+  var user = req.user;
+  await File.find({ users: user._id, name, tags: tag }, (err, file) => {
     if (err) {
       res.status(400).send("Something went wrong!");
     }
@@ -171,35 +192,35 @@ router.get("/date/:id", auth, async (req, res) => {
   });
 });
 
-function sendEmail() {
-  const files = File.find({ deadline: { $gt: Date.now() } });
-  console.log("Checking for deadlines");
-  var transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "mrj9012@gmail.com",
-      pass: "12345678",
-    },
-  });
+// function sendEmail() {
+//   const files = File.find({ deadline: { $gt: Date.now() } });
+//   console.log("Checking for deadlines");
+//   var transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: "mrj9012@gmail.com",
+//       pass: "12345678",
+//     },
+//   });
 
-  files.forEach((file) => {
-    var mailOptions = {
-      from: "mrj9012@gmail.com",
-      to: file.user.email,
-      subject: "Deadline",
-      text: "Deadline passed",
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
-  });
-}
+//   files.forEach((file) => {
+//     var mailOptions = {
+//       from: "mrj9012@gmail.com",
+//       to: file.user.email,
+//       subject: "Deadline",
+//       text: "Deadline passed",
+//     };
+//     transporter.sendMail(mailOptions, function (error, info) {
+//       if (error) {
+//         console.log(error);
+//       } else {
+//         console.log("Email sent: " + info.response);
+//       }
+//     });
+//   });
+// }
 
-setInterval(sendEmail, 60000);
+// setInterval(sendEmail, 60000);
 
 // router.get("/auth/google", async (req, res) => {
 //   passport.authenticate("google", { scope: ["email"] });

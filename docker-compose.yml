@@ -2,16 +2,11 @@ version: "3.9"
 
 services:
   # web:
-  #   build: ./front
+  #   build: ./front/uploadproject
   #   ports:
   #     - 3000:3000
   #   volumes:
-  #     - ./frontend:/app
-  # web-tests:
-  #   image: bachelor_web
-  #   volumes:
-  #     - ./front:/app
-  #   command: npm test
+  #     - ./front/uploadproject:/app
   api:
     build: ./back
     ports:
