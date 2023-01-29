@@ -14,8 +14,7 @@ router.get("/searchfiles", auth, async (req, res) => {
   const text = req.query.text;
   const files = await File.find({ user: user._id });
   const results = [];
-  FIND
-    .find(text, ".", ".txt$")
+  FIND.find(text, ".", ".txt$")
     .then(function (results) {
       for (const file in results) {
         results.push(file);
@@ -56,7 +55,7 @@ router.post("/signup", async (req, res) => {
   // console.log(req)
 
   // console.log(user)
-  
+
   try {
     await user.save();
     const token = await user.generateAuthToken();
@@ -76,7 +75,7 @@ router.post("/login", async (req, res) => {
       req.body.email,
       req.body.password
     );
-    
+
     const token = await user.generateAuthToken();
     res.status(200).send({ user, token });
   } catch (e) {
@@ -155,7 +154,7 @@ const upload = multer({
   limits: { fileSize: 10000000 * 2 },
   fileFilter: function (req, file, cb) {
     if (!file.originalname.match(/\.(txt)$/)) {
-      return cb(new Error("Please upload a pdf document"));
+      return cb(new Error("Please upload a txt document"));
     }
     cb(undefined, true);
   },
