@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const File = require("./file");
+const UserInfoError = require("passport-google-oauth20/lib/errors/userinfoerror");
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,10 +34,10 @@ const userSchema = new mongoose.Schema(
       //   }
       // },
     },
-    name: {
-      type: String,
-      required: true,
-    },
+    // name: {
+    //   type: String,
+    //   required: true,
+    // },
     /* colleagues: [
       {
         colleague: {
@@ -86,7 +87,7 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
-
+  console.log(token);
   user.tokens = user.tokens.concat({ token });
   await user.save();
 
@@ -94,7 +95,11 @@ userSchema.methods.generateAuthToken = async function () {
 };
 
 userSchema.statics.findByCredentials = async (email, password) => {
-  const user = await user.findOne({ email });
+console.log(email)
+  
+  const user = await User.findOne({ email });
+
+  console.log(user);
 
   if (!user) {
     throw new Error("Unable to login");
@@ -111,7 +116,6 @@ userSchema.statics.findByCredentials = async (email, password) => {
 
 userSchema.pre("save", async function (next) {
   const user = this;
-
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
@@ -124,6 +128,6 @@ userSchema.pre("remove", async function (next) {
   next();
 });
 
-const user = mongoose.model("user", userSchema);
+const User = mongoose.model("User", userSchema);
 
-module.exports = user;
+module.exports = User;

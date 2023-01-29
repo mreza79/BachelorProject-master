@@ -50,9 +50,13 @@ const searchStream = (filename, text) => {
   });
 }; */
 
-router.post("/", async (req, res) => {
+router.post("/signup", async (req, res) => {
   const user = new User(req.body);
 
+  // console.log(req)
+
+  // console.log(user)
+  
   try {
     await user.save();
     const token = await user.generateAuthToken();
@@ -72,8 +76,9 @@ router.post("/login", async (req, res) => {
       req.body.email,
       req.body.password
     );
+    
     const token = await user.generateAuthToken();
-    res.send({ user, token });
+    res.status(200).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
   }
