@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
+const path = require("path");
 const User = require("../models/user");
 const File = require("../models/file");
 const auth = require("../middleware/auth");
@@ -151,40 +152,81 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10000000 * 2 },
   fileFilter: function (req, file, cb) {
     if (!file.originalname.match(/\.(txt)$/)) {
       return cb(new Error("Please upload a txt document"));
     }
     cb(undefined, true);
   },
-}).single("file" + Date.now());
+}).single("file");
 
-router.post("/me/files", auth, async (req, res) => {
-  
+router.post("/me/files", upload, auth, async (req, res) => {
+  // console.log(req);
+  console.log(req.file);
+
+  const file = new File({
+    name: req.file.originalname,
+    user: req.user,
+    tag: req.tag,
+    deadline: req.deadline,
+  });
+
+  try {
+    await file.save();
+  } catch {
+    res.status(400).send("Cannot save to database");
+    return;
+  }
+
   upload(req, res, (err) => {
     if (err) {
-      res.status(400).send("Something went wrong!");
+      res.status(400).send("Cannot upload file");
+    } else {
+      res.sendFile(req.file);
     }
-    res.send(req.file);
   });
 });
 
 router.get("/me/files", auth, async (req, res) => {
-  const files = File.find({ users: req.user });
-  res.status(201).send(files);
+  console.log(req.user._id);
+  try {
+    const files = await File.find({ user: req.user._id });
+    if (!files) {
+      res.status(404).send("No files found");
+    } else {
+      res.status(201).send(files);
+    }
+  } catch (e) {
+    res.status(500).send(e);
+  }
 });
 
 router.get("/search", auth, async (req, res) => {
   var name = req.query.name;
   var tag = req.query.tag;
   var user = req.user;
-  await File.find({ users: user._id, name, tags: tag }, (err, file) => {
-    if (err) {
-      res.status(400).send("Something went wrong!");
-    }
-    res.send(file);
-  });
+  if (!tag) {
+    await File.find({ user: user._id, name }, (err, file) => {
+      if (err) {
+        res.status(400).send("Something went wrong!");
+      }
+      res.send(file);
+    });
+  } else if (!name) {
+    await File.find({ user: user._id, tag }, (err, file) => {
+      if (err) {
+        res.status(400).send("Something went wrong!");
+      }
+      res.send(file);
+    });
+  } else {
+    await File.find({ user: user._id, name, tag }, (err, file) => {
+      if (err) {
+        res.status(400).send("Something went wrong!");
+      }
+      res.send(file);
+    });
+  }
 });
 
 router.get("/date/:id", auth, async (req, res) => {

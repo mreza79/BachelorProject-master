@@ -8,22 +8,15 @@ const fileSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    tags: [
-      {
-        tag: {
-          type: String,
-        },
-      },
-    ],
-    users: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: "User",
-        },
-      },
-    ],
+    tag: {
+      type: String,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+
     deadline: {
       type: Date,
     },
