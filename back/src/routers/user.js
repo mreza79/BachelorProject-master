@@ -13,18 +13,53 @@ const Find = require("find-in-files");
 router.get("/searchfiles", auth, async (req, res) => {
   const user = req.user;
   const text = req.query.text;
-  const files = await File.find({ user: user._id });
-  const results = [];
-  Find.find(text, ".", ".txt$")
-    .then(function (results) {
-      for (const file in results) {
-        results.push(file);
-      }
-    })
-    .catch(function (err) {
-      console.error(err);
-    });
-  res.send(results);
+  answers = [];
+  console.log(text);
+  try {
+    const files = await File.find({ user: user._id });
+    if (!files) {
+      res.status(404).send("No files found");
+    } else {
+      /* const results = [];
+      files.forEach((file) => {
+        console.log(file);
+        Find.find(text, "./uploads", file.name)
+          .then(function (results) {
+            results.push(file);
+          })
+          .catch(function (err) {
+            console.error(err);
+          });
+        res.send(results);
+      }); */
+
+      files.forEach((file) => {
+        Find.find(text, "./uploads", file.name).then(function (results) {
+          for (var result in results) {
+            var res = results[result];
+            console.log(
+              'found "' +
+                res.matches[0] +
+                '" ' +
+                res.count +
+                ' times in "' +
+                result +
+                '"'
+            );
+            answers.push(file);
+          }
+          console.log(answers)
+        });
+        console.log("answers")
+        console.log(answers)
+      });
+      console.log("answers2");
+      console.log(answers);
+      res.status(200).send(answers);
+    }
+  } catch (e) {
+    res.status(500).send(e);
+  }
 });
 
 /* const fs = require("fs");
@@ -145,7 +180,7 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     cb(
       null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+      file.fieldname /* + "-" + Date.now() */ + path.extname(file.originalname)
     );
   },
 });
@@ -239,35 +274,37 @@ router.get("/date/:id", auth, async (req, res) => {
   });
 });
 
-// function sendEmail() {
-//   const files = File.find({ deadline: { $gt: Date.now() } });
-//   console.log("Checking for deadlines");
-//   var transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: "mrj9012@gmail.com",
-//       pass: "12345678",
-//     },
-//   });
+async function sendEmail() {
+  console.log("Checking for deadlines");
+  var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "mrj9012@gmail.com",
+      pass: "12345678",
+    },
+  });
+  const files = await File.find({ deadline: { $gt: Date.now() } });
 
-//   files.forEach((file) => {
-//     var mailOptions = {
-//       from: "mrj9012@gmail.com",
-//       to: file.user.email,
-//       subject: "Deadline",
-//       text: "Deadline passed",
-//     };
-//     transporter.sendMail(mailOptions, function (error, info) {
-//       if (error) {
-//         console.log(error);
-//       } else {
-//         console.log("Email sent: " + info.response);
-//       }
-//     });
-//   });
-// }
+  console.log(files);
 
-// setInterval(sendEmail, 60000);
+  for (const file of files) {
+    var mailOptions = {
+      from: "mrj9012@gmail.com",
+      to: file.user.email,
+      subject: "Deadline",
+      text: "Deadline passed",
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+  }
+}
+
+setInterval(sendEmail, 60000);
 
 // router.get("/auth/google", async (req, res) => {
 //   passport.authenticate("google", { scope: ["email"] });
