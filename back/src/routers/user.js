@@ -46,17 +46,19 @@ router.get("/searchfiles", auth, async (req, res) => {
                 result +
                 '"'
             );
-            answers.push(file);
+            // console.log(file);
+            res.send(file);
+            // return;
           }
-          console.log(answers)
+          // console.log(answers)
         });
-        console.log("answers")
-        console.log(answers)
+        // console.log("answers")
+        // console.log(answers)
       });
-      console.log("answers2");
-      console.log(answers);
-      res.status(200).send(answers);
+      // console.log("answers2");
+      // console.log(answers);
     }
+    // res.status(200).send(answers);
   } catch (e) {
     res.status(500).send(e);
   }
@@ -106,6 +108,7 @@ router.post("/signup", async (req, res) => {
 // })
 
 router.post("/login", async (req, res) => {
+  console.log(req.body);
   try {
     const user = await User.findByCredentials(
       req.body.email,
@@ -138,6 +141,23 @@ router.post("/logoutAll", auth, async (req, res) => {
     res.send();
   } catch (e) {
     res.status(500).send(e);
+  }
+});
+
+router.delete("/file/:id", auth, async (req, res) => {
+  try {
+    const file = await File.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!file) {
+      res.status(404).send();
+    }
+
+    res.send(file);
+  } catch (e) {
+    res.status(500).send();
   }
 });
 
@@ -197,13 +217,15 @@ const upload = multer({
 
 router.post("/me/files", upload, auth, async (req, res) => {
   // console.log(req);
-  console.log(req.file);
+  // console.log(req.file);
+  console.log(req.tag);
+  console.log(req.deadline);
 
   const file = new File({
     name: req.file.originalname,
     user: req.user,
-    tag: req.tag,
-    deadline: req.deadline,
+    tag: "file",
+    deadline: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
   });
 
   try {
@@ -230,6 +252,20 @@ router.get("/me/files", auth, async (req, res) => {
       res.status(404).send("No files found");
     } else {
       res.status(201).send(files);
+    }
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+router.get("/me/file/:id", auth, async (req, res) => {
+  console.log(req.params.id);
+  try {
+    const file = await File.findOne({ _id: req.params.id });
+    if (!file) {
+      res.status(404).send("No file found");
+    } else {
+      res.status(201).send(file);
     }
   } catch (e) {
     res.status(500).send(e);
