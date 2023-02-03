@@ -319,7 +319,7 @@ async function sendEmail() {
       pass: "12345678",
     },
   });
-  const files = await File.find({ deadline: { $gt: Date.now() } });
+  const files = await File.find({ deadline: { $lt: Date.now() } });
 
   console.log(files);
 
