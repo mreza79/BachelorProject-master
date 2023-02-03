@@ -15,6 +15,7 @@ services:
       DB_URL: mongodb://db/bachelor
       JWT_SECRET: thisismynewcourse
       PORT: 3000
+      # PASS: 
     volumes:
       - ./back:/app
     command: ./docker-entrypoint.sh

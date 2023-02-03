@@ -6,7 +6,7 @@ const fileSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-      unique: true,
+      // unique: true,
     },
     tag: {
       type: String,

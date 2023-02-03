@@ -47,7 +47,7 @@ router.get("/searchfiles", auth, async (req, res) => {
                 '"'
             );
             // console.log(file);
-            res.send(file);
+            res.send(file._id);
             // return;
           }
           // console.log(answers)
